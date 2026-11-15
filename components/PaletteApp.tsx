@@ -2,7 +2,15 @@
 
 import { useEffect, useState } from 'react';
 
-type Swatch = { hex: string; name: string; rgb: { r: number; g: number; b: number }; isDark: boolean; textColor: string };
+// rgb comes back on paid plans only; on a free key it's null, so it's worked out from the hex instead.
+type Swatch = { hex: string; name: string; rgb?: { r: number; g: number; b: number } | null; isDark: boolean; textColor: string };
+
+/** "#3B82F6" → "59, 130, 246" */
+const rgbOf = (s: Swatch) => {
+  if (s.rgb) return `${s.rgb.r}, ${s.rgb.g}, ${s.rgb.b}`;
+  const n = parseInt(s.hex.replace('#', ''), 16);
+  return `${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}`;
+};
 type Palette = { source: string; sourceName: string; scheme: string; variation: string; colorPalette: Swatch[] };
 type Result = Palette & { error?: string; code?: string };
 type Saved = { source: string; scheme: string; variation: string; hexes: string[] };
@@ -144,7 +152,7 @@ export default function PaletteApp() {
                 <span className="name">{s.name}</span>
                 <span className="hexcode">{copied === s.hex ? 'Copied' : s.hex}</span>
                 <span className="rgb">
-                  rgb({s.rgb.r}, {s.rgb.g}, {s.rgb.b})
+                  rgb({rgbOf(s)})
                 </span>
               </button>
             ))}
